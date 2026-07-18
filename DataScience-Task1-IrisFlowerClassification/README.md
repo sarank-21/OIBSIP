@@ -1,78 +1,208 @@
 # 🌸 Iris Flower Classification
 
-## Objective
-Train a machine learning classification model to identify the species of an iris flower — **Setosa**, **Versicolor**, or **Virginica** — from its physical measurements (sepal and petal length/width).
+## 📖 About the Project
 
-## Technologies Used
-- **Python** — core language
-- **pandas / numpy** — data loading and manipulation
-- **scikit-learn** — dataset loading, `StandardScaler`, Logistic Regression, K-Nearest Neighbours, Decision Tree, Random Forest, evaluation metrics
-- **matplotlib / seaborn / plotly** — visualization and EDA
+This project trains and compares multiple machine learning classifiers to identify the species of an iris flower — *Setosa*, *Versicolor*, or *Virginica* — from four physical measurements (sepal length/width, petal length/width). The pipeline covers EDA, visual feature-separation analysis, model training/evaluation across four algorithms, and deployment of the best-performing model as an interactive Streamlit prediction app. It's a compact end-to-end demonstration of the classic ML workflow: data → insight → model → deployment.
 
-## Dataset Information
-- **Source:** the classic **Iris dataset**, loaded directly from `sklearn.datasets.load_iris()` (no external file needed)
-- **Size:** 150 samples, 4 numeric features (sepal length, sepal width, petal length, petal width — all in cm), 1 duplicate row removed
-- **Classes:** 3 species — `setosa` (50), `versicolor` (50), `virginica` (49, after duplicate removal) — a nearly perfectly balanced dataset
-- **Missing values:** none
+---
 
-## Steps / Workflow
-1. **Load the data** — build a tidy DataFrame from `load_iris()`, mapping numeric species codes to species names
-2. **Exploratory Data Analysis (EDA)**
-   - Checked shape, dtypes, duplicates (1 found and removed), missing values (none), descriptive statistics, and class balance
-3. **Visualizations**
-   - Pairplot of all four features colored by species
-   - Boxplots of each feature grouped by species
-   - Correlation heatmap between features
-4. **Feature Selection Discussion**
-   - Petal length and petal width are the **most discriminative** features (almost no overlap between species, ~0.96 correlation with each other and with species)
-   - Sepal width is the **least discriminative** feature (heavy overlap between Versicolor and Virginica)
-5. **Train/Test Split** — 80/20 split, stratified by species (119 training samples, 30 test samples)
-6. **Feature Scaling** — `StandardScaler` applied for distance/gradient-based models (Logistic Regression, KNN)
-7. **Model Training** — trained and evaluated four classifiers:
-   - Logistic Regression
-   - K-Nearest Neighbours (k=5)
-   - Decision Tree
-   - Random Forest (100 trees)
-8. **Evaluation** — accuracy, weighted precision/recall/F1, confusion matrices, and classification reports for each model
-9. **Best Model Selection** — programmatically selected the model with the highest test accuracy
+## 🔨 Development Process
 
-## Model Performance
+**1. Data Collection**
+- Loaded the built-in `load_iris()` dataset from scikit-learn (no external download needed)
+- Combined `iris.data` and `iris.target` into a single tidy `pandas` DataFrame with a human-readable `species` column mapped from `iris.target_names`
 
-| Model | Accuracy | Precision | Recall | F1-Score |
-|---|---|---|---|---|
-| **Logistic Regression** | 0.9333 | 0.9333 | 0.9333 | 0.9333 |
-| K-Nearest Neighbors | 0.9333 | 0.9444 | 0.9333 | 0.9327 |
-| Decision Tree | 0.9333 | 0.9333 | 0.9333 | 0.9333 |
-| Random Forest | 0.9333 | 0.9333 | 0.9333 | 0.9333 |
+**2. Data Cleaning & Preprocessing**
+- Checked dataset shape (150 rows × 6 columns) and column data types
+- Detected and dropped duplicate rows with `df.duplicated()` / `df.drop_duplicates()`
+- Verified there were no missing/null values via `df.isnull().sum()`
+- Confirmed class balance with `value_counts()` — Setosa and Versicolor at 50 samples each, Virginica at 49 after de-duplication
 
-*(Test set: 30 samples — 10 per species. Metrics are weighted averages across the 3 classes.)*
+**3. Exploratory Data Analysis & Visualisation**
+- Built a `seaborn` pairplot across all four features, colored by species, to visualise class separability
+- Plotted per-feature boxplots (2×2 grid) comparing distributions across species
+- Generated a correlation heatmap over the four numeric features
 
-**Best-performing model:** Logistic Regression — Test accuracy: **0.9333**
+**4. Feature Selection Discussion**
+- Identified `petal length (cm)` and `petal width (cm)` as the most discriminative features (near-zero overlap between species, ~0.96 correlation with target)
+- Identified `sepal width (cm)` as the weakest/least discriminative feature
 
-## Results
-- All four models reached the **same 93.33% test accuracy** on this run (`random_state=42`), reflecting how well-separated the Iris classes are.
-- **Setosa** was classified perfectly by every model (linearly separable from the other two species).
-- The main source of error across all models was confusion between **Versicolor and Virginica**, the two species with genuine feature overlap — visible in each model's confusion matrix.
-- Since accuracy was tied, the notebook favors the **simpler, more interpretable** model (Logistic Regression) as the declared best model, following Occam's razor — though Random Forest is noted as an equally strong, robust alternative.
-- **Takeaway:** petal length and petal width alone would likely be enough to achieve high classification accuracy on this dataset; the choice between models here comes down to interpretability rather than raw performance.
+**5. Train/Test Split & Scaling**
+- Performed an 80/20 stratified `train_test_split` (`random_state=42`) to preserve class ratios
+- Applied `StandardScaler` to standardise features for scale-sensitive models (Logistic Regression, KNN)
 
-## How to Run the Project
+**6. Model Building**
+- Trained four classifiers on the split data: **Logistic Regression**, **K-Nearest Neighbours** (`n_neighbors=5`), **Decision Tree** (`random_state=42`), and **Random Forest** (`n_estimators=100`, `random_state=42`)
 
-### 1. Install dependencies
+**7. Model Evaluation**
+- Scored every model on Accuracy, Precision, Recall, and F1-score (weighted average) plus a full `classification_report`
+- Visualised per-model confusion matrices side-by-side and a bar chart comparing accuracy across all four models
+
+**8. Best Model Selection & Deployment**
+- Programmatically selected the top-scoring model from the results table
+- Persisted the winning model, scaler, and label metadata with `joblib`, then wrapped it in a Streamlit app for interactive predictions
+
+---
+
+## 🔎 Key Features
+
+### 🧹 Automated Data Cleaning
+Duplicate and null checks run automatically before any analysis touches the data.
+
+### 📊 Rich Exploratory Visualisations
+Pairplots, per-feature boxplots, and a correlation heatmap reveal how species separate across measurements.
+
+### 🧠 Feature Selection Reasoning
+A written discussion (backed by the plots) identifies petal measurements as the most discriminative features.
+
+### 🎯 Multi-Model Comparison
+Four classifiers — Logistic Regression, KNN, Decision Tree, Random Forest — are trained and benchmarked side-by-side.
+
+### 📈 Full Evaluation Suite
+Accuracy, Precision, Recall, F1-score, classification reports, and confusion matrices for every model.
+
+### 🏆 Automatic Best-Model Selection
+The top-performing model is chosen programmatically from the results table, no manual picking required.
+
+### 💾 Model Persistence
+The winning model, scaler, and feature/label metadata are saved with `joblib` for reuse outside the notebook.
+
+### 🖥️ One-Click Streamlit Deployment
+The saved model is wired directly into a Streamlit app, launched straight from the notebook.
+
+### 📥 Dual Prediction Modes
+The deployed app supports both CSV batch upload and manual single-sample input for predictions.
+
+---
+
+## 🧩 Features (Detailed)
+
+### Exploratory Data Analysis
+- Shape, dtypes, missing-value, and duplicate checks
+- Descriptive statistics via `df.describe()`
+- Class balance verification across the three species
+
+### Visual Analysis
+- `sns.pairplot` colored by species across all four features
+- 2×2 boxplot grid comparing each feature's distribution by species
+- Correlation heatmap (`coolwarm` colormap) over the numeric feature set
+
+### Model Training & Evaluation
+- Scaled features fed to Logistic Regression and KNN
+- Weighted Precision/Recall/F1 computed for imbalanced-safe scoring
+- Side-by-side confusion matrix grid (one heatmap per model) for error analysis
+- Horizontal bar chart ranking models by test accuracy
+
+### Deployment
+- `streamlit_app.py` generated directly from the notebook via `%%writefile`
+- Loads `best_model.pkl`, `scaler.pkl`, `feature_names.pkl`, and `target_names.pkl`
+- Supports CSV upload for batch predictions or manual numeric input for a single prediction
+
+---
+
+## 🛠️ Tech Stack
+
+**📊 Data Processing & Analysis**
+- `pandas` — DataFrame construction, cleaning, aggregation
+- `numpy` — numeric array handling
+- `scikit-learn` (`datasets`, `model_selection`, `preprocessing`) — dataset loading, train/test split, feature scaling
+
+**🧠 Machine Learning**
+- `scikit-learn` — `LogisticRegression`, `KNeighborsClassifier`, `DecisionTreeClassifier`, `RandomForestClassifier`
+- `scikit-learn.metrics` — accuracy, precision, recall, F1, confusion matrix, classification report
+
+**📈 Data Visualisation**
+- `matplotlib` — plotting engine for boxplots, heatmaps, bar charts
+- `seaborn` — pairplots, boxplots, correlation heatmap, confusion matrix heatmaps
+- `plotly.express` — imported for interactive visualisation support
+
+**🖥️ Deployment**
+- `streamlit` — interactive web app for serving predictions
+- `joblib` — model, scaler, and metadata persistence
+
+---
+
+## ⚙️ Setup & Installation
+
+**1. Clone the Repository**
 ```bash
-pip install pandas numpy matplotlib seaborn plotly scikit-learn
+git clone https://github.com/<your-username>/iris-flower-classification.git
+cd iris-flower-classification
 ```
 
-### 2. Run the notebook
-No dataset download is required — the Iris dataset ships with scikit-learn. Simply open the notebook and run all cells top to bottom:
+**2. Create a Virtual Environment**
 ```bash
-jupyter notebook "Task_1-_Iris_Flower_Classification.ipynb"
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# macOS / Linux
+python3 -m venv venv
+source venv/bin/activate
 ```
 
-The notebook will:
-- Load the Iris dataset and run EDA (shape, duplicates, missing values, class balance)
-- Generate pairplots, boxplots, and a correlation heatmap
-- Split and scale the data
-- Train and evaluate Logistic Regression, KNN, Decision Tree, and Random Forest
-- Plot confusion matrices and a model accuracy comparison chart
-- Print the best-performing model and its test accuracy
+**3. Install Dependencies**
+```bash
+pip install -r requirements.txt
+# Core libraries: numpy pandas matplotlib seaborn plotly scikit-learn joblib streamlit
+```
+
+**4. Prepare the Dataset**
+No external dataset needed — the Iris data loads directly from `sklearn.datasets.load_iris()`.
+
+**5. Run the Notebook**
+Open `Task_1-Iris_Flower_Classification.ipynb` in Jupyter and run all cells in order to train the models and generate `best_model.pkl`, `scaler.pkl`, `feature_names.pkl`, and `target_names.pkl`.
+
+**6. Run the Streamlit App**
+```bash
+streamlit run streamlit_app.py
+```
+
+## 🧭 How It Works
+
+```
+                    load_iris() → pandas DataFrame
+                              │
+                    Data Cleaning & EDA
+             (duplicate check, null check, describe())
+                              │
+              Visualisation Layer (pairplot, boxplots,
+                      correlation heatmap)
+                              │
+              Feature Selection Discussion (petal
+                 length/width identified as key)
+                              │
+           train_test_split()  →  StandardScaler
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        │                     │                      │
+ LogisticRegression   KNeighborsClassifier    DecisionTreeClassifier
+        │                     │                      │
+        └─────────────────────┼──────────────────────┘
+                              │
+                    RandomForestClassifier
+                              │
+          Evaluation (accuracy, precision, recall,
+             F1, confusion matrices, bar chart)
+                              │
+              Best Model Selection (highest
+                    test accuracy)
+                              │
+       joblib.dump → best_model.pkl / scaler.pkl /
+         feature_names.pkl / target_names.pkl
+                              │
+                  streamlit_app.py
+          (CSV upload  or  manual number_input)
+                              │
+                   Predicted Species Output
+```
+
+---
+
+## 📋 Project Overview
+
+This project is a supervised multi-class classification pipeline built around the classic Iris dataset, comparing four algorithms — Logistic Regression, K-Nearest Neighbours, Decision Tree, and Random Forest — to identify the strongest performer for distinguishing Setosa, Versicolor, and Virginica flowers. The core technical approach combines exploratory visualisation (pairplots, boxplots, correlation heatmaps) with a data-driven feature selection discussion, followed by a stratified train/test split, feature scaling, and a full evaluation suite covering accuracy, precision, recall, F1-score, and confusion matrices. The best-performing model is selected programmatically and persisted with `joblib` alongside its scaler and label metadata. That saved model powers a lightweight Streamlit app offering both batch CSV predictions and manual single-sample input. The result is a compact but complete demonstration of the ML lifecycle — from raw data to a usable, interactive prediction tool — well suited as a teaching example or a template for other small classification tasks.
+
+---
+
+⭐ **If you find this project useful, give it a star on GitHub and share your feedback!**
