@@ -16,9 +16,6 @@ nltk.download("stopwords")
 # ---------------------------------------------------
 # Load Saved Model
 # ---------------------------------------------------
-# ---------------------------------------------------
-# Load Saved Model
-# ---------------------------------------------------
 model = joblib.load("best_model.pkl")
 tfidf = joblib.load("tfidf_vectorizer.pkl")
 DECISION_THRESHOLD = joblib.load("decision_threshold.pkl")
